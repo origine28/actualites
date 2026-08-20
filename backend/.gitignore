@@ -1,0 +1,5 @@
+# Fichier d'environnement local (jamais commité)
+.env
+
+# Client Prisma généré
+src/generated/

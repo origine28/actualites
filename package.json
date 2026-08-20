@@ -1,0 +1,33 @@
+{
+  "name": "news-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plateforme d'actualités, téléchargements et administration",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace @news/backend",
+    "dev:frontend": "npm run dev --workspace @news/frontend",
+    "build": "npm run build --workspace @news/backend && npm run build --workspace @news/frontend",
+    "test": "npm run test --workspace @news/backend && npm run test --workspace @news/frontend",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "npm run lint --workspace @news/backend && npm run lint --workspace @news/frontend",
+    "typecheck": "npm run typecheck --workspace @news/backend && npm run typecheck --workspace @news/frontend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "concurrently": "^9.2.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.9.1": true,
+    "esbuild@0.28.2": true,
+    "prisma@7.9.1": true
+  }
+}

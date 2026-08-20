@@ -1,0 +1,409 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum LoginResult {
+  SUCCESS
+  FAILURE
+  LOGOUT
+}
+
+enum AccessType {
+  USER
+  ADMIN
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  VIMEO
+}
+
+enum VideoStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DownloadType {
+  PDF
+  MOBILE
+  DESKTOP
+}
+
+enum DownloadPlatform {
+  ANDROID
+  IOS
+  WINDOWS
+  LINUX
+  MACOS
+  OTHER
+}
+
+enum DownloadStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ---------------------------------------------------------------------------
+// Modèles
+// ---------------------------------------------------------------------------
+
+// Modèle technique minimal de Phase 1 pour vérifier la connexion/migration.
+model SystemInfo {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String?
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id                   String     @id @default(uuid())
+  username             String     @unique
+  email                String     @unique
+  password_hash        String
+  role                 Role       @default(USER)
+  status               UserStatus @default(ACTIVE)
+  first_name           String?
+  last_name            String?
+  failed_login_attempts Int       @default(0)
+  locked_until         DateTime?
+  last_login_at        DateTime?
+  created_at           DateTime   @default(now())
+  updated_at           DateTime   @updatedAt
+  deleted_at           DateTime?
+
+  sessions      Session[]
+  loginLogs     LoginLog[]
+  auditLogs     AuditLog[]
+  articles      Article[]
+  images        Image[]
+  videos        Video[]
+  downloads     Download[]
+  downloadLogs  DownloadLog[]
+  contactMessages ContactMessage[]
+
+  @@index([status])
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  user_id    String
+  token_hash String   @unique
+  ip         String?
+  user_agent String?
+  created_at DateTime @default(now())
+  expires_at DateTime
+  revoked_at DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@index([revoked_at])
+}
+
+model LoginLog {
+  id          String      @id @default(uuid())
+  user_id     String?
+  username    String
+  ip          String?
+  source_port Int?
+  result      LoginResult
+  access_type AccessType
+  user_agent  String?
+  session_id  String?
+  created_at  DateTime    @default(now())
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([created_at])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  user_id     String?
+  action      String
+  entity_type String?
+  entity_id   String?
+  metadata    Json?
+  ip          String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([action])
+  @@index([created_at])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 — Contenu éditorial (catégories, tags, articles)
+// ---------------------------------------------------------------------------
+
+model Category {
+  id         String         @id @default(uuid())
+  name       String
+  slug       String         @unique
+  parent_id  String?
+  sort_order Int            @default(0)
+  status     CategoryStatus @default(ACTIVE)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+
+  parent    Category?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children  Category[] @relation("CategoryTree")
+  articles  Article[]
+  videos    Video[]
+
+  @@index([parent_id])
+  @@index([status])
+}
+
+model Tag {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  slug       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  articles ArticleTag[]
+
+  @@index([slug])
+}
+
+model ArticleTag {
+  article_id String
+  tag_id     String
+
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([article_id, tag_id])
+}
+
+model Article {
+  id                String        @id @default(uuid())
+  title             String
+  slug              String        @unique
+  summary           String?
+  content           String
+  featured_image_id String?
+  category_id       String?
+  author_id         String
+  status            ArticleStatus @default(DRAFT)
+  source            String?
+  language          String        @default("fr")
+  published_at      DateTime?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  deleted_at        DateTime?
+
+  category      Category?       @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  author        User            @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  featuredImage Image?          @relation("ArticleFeaturedImage", fields: [featured_image_id], references: [id], onDelete: SetNull)
+  gallery       ArticleImage[]
+  tags          ArticleTag[]
+
+  @@index([status])
+  @@index([published_at])
+  @@index([category_id])
+  @@index([author_id])
+  @@index([created_at])
+  @@index([slug])
+  @@index([deleted_at])
+}
+
+model ArticleImage {
+  article_id String
+  image_id   String
+  position   Int    @default(0)
+
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  image   Image   @relation(fields: [image_id], references: [id], onDelete: Cascade)
+
+  @@id([article_id, image_id])
+  @@index([image_id])
+  @@index([position])
+}
+
+model Image {
+  id            String   @id @default(uuid())
+  filename      String   @unique
+  original_name String   @default("")
+  mime_type     String
+  size_bytes    Int
+  width         Int
+  height        Int
+  sha256        String
+  path          String
+  variants      Json?
+  alt           String   @default("")
+  uploaded_by   String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  uploader      User?          @relation(fields: [uploaded_by], references: [id], onDelete: SetNull)
+  articleImages ArticleImage[]
+  featuredBy    Article[]      @relation("ArticleFeaturedImage")
+  thumbnails    Video[]        @relation("VideoThumbnail")
+
+  @@index([uploaded_by])
+  @@index([created_at])
+}
+
+model Video {
+  id                 String        @id @default(uuid())
+  title              String
+  description        String?
+  platform           VideoPlatform
+  external_id        String
+  url                String
+  thumbnail_image_id String?
+  category_id        String?
+  author_id          String
+  status             VideoStatus   @default(DRAFT)
+  published_at       DateTime?
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+  deleted_at         DateTime?
+
+  thumbnail Image?      @relation("VideoThumbnail", fields: [thumbnail_image_id], references: [id], onDelete: SetNull)
+  category  Category?   @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  author    User        @relation(fields: [author_id], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@index([published_at])
+  @@index([category_id])
+  @@index([author_id])
+  @@index([deleted_at])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6 — Téléchargements (PDF, applications mobile/desktop)
+// ---------------------------------------------------------------------------
+
+model DownloadCategory {
+  id         String         @id @default(uuid())
+  name       String
+  slug       String         @unique
+  sort_order Int            @default(0)
+  status     CategoryStatus @default(ACTIVE)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+
+  downloads Download[]
+
+  @@index([status])
+}
+
+model Download {
+  id                String         @id @default(uuid())
+  title             String
+  slug              String         @unique
+  description       String?
+  type              DownloadType
+  platform          DownloadPlatform
+  version           String?
+  filename          String         @unique
+  original_name     String         @default("")
+  storage_path      String
+  mime_type         String
+  size_bytes        Int
+  sha256            String
+  download_category_id String?
+  author_id         String
+  status            DownloadStatus @default(DRAFT)
+  published_at      DateTime?
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  deleted_at        DateTime?
+
+  download_category DownloadCategory? @relation(fields: [download_category_id], references: [id], onDelete: Restrict)
+  author            User              @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  logs              DownloadLog[]
+
+  @@index([status])
+  @@index([type])
+  @@index([platform])
+  @@index([download_category_id])
+  @@index([author_id])
+  @@index([created_at])
+  @@index([deleted_at])
+}
+
+enum ContactMessageStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
+
+model ContactMessage {
+  id         String                @id @default(uuid())
+  name       String
+  email      String
+  subject    String
+  message    String
+  ip         String?
+  user_id    String?
+  status     ContactMessageStatus  @default(NEW)
+  created_at DateTime              @default(now())
+  updated_at DateTime              @updatedAt
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([created_at])
+  @@index([user_id])
+}
+
+model DownloadLog {
+  id          String   @id @default(uuid())
+  user_id     String
+  download_id String
+  ip          String?
+  created_at  DateTime @default(now())
+
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  download Download @relation(fields: [download_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([download_id])
+  @@index([created_at])
+}

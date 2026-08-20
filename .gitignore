@@ -1,0 +1,31 @@
+# Dépendances
+node_modules/
+
+# Environnement (jamais de secrets en Git)
+.env
+.env.*
+!.env.example
+
+# Builds
+dist/
+build/
+
+# Tests
+coverage/
+test-results/
+playwright-report/
+
+# Stockage fichiers uploadés (hors code)
+storage/
+uploads/
+
+# Logs
+logs/
+*.log
+
+# Divers
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.vite/
+.turbo/
