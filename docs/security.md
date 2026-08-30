@@ -10,7 +10,7 @@ Résumé de la matrice de sécurité validée (détail complet dans la conceptio
 - Noms de fichiers **générés côté serveur** (UUID), chemins strictement contrôlés, SHA-256 enregistré.
 - Validation des **extensions + signatures réelles** quand elles existent ; aucune fausse garantie de format (ex. DMG : vérification du trailer `koly` en fin de fichier, sinon niveau documenté).
 - **Contenu authentifié = jamais de cache partagé** : `/api/*`, `/login`, `/admin/*`, téléchargements → `Cache-Control: private, no-store`.
-- IP : `CF-Connecting-IP` uniquement ; les headers du navigateur ne sont jamais fiables ; `source_port = NULL` derrière le tunnel.
+- IP : `CF-Connecting-IP` uniquement ; les headers du navigateur ne sont jamais fiables ; le port source capté est **celui de l'extrémité vue par l'application** (voir « Résolution d'IP »), jamais un port inventé.
 - Backend bindé sur `127.0.0.1` uniquement ; aucune écoute sur `0.0.0.0`.
 - Secrets uniquement dans `.env` (gitignoré) ; `.env.example` sans valeur réelle.
 - TypeScript strict ; validation d'environnement Zod ; limites de tailles configurables.
@@ -61,12 +61,15 @@ Configuré via `CORS_ORIGIN` dans `.env` :
 - **Contact** : 5 messages / 15 min par IP.
 - **Global** : 200 requêtes / 15 min par IP sur `/api/*` (anti-DDoS basique).
 
-## Résolution d'IP (Phase 3 + Phase 8)
+## Résolution d'IP et de port source (Phase 3 + Phase 8)
 
 Chaîne de confiance : `CF-Connecting-IP` → `req.ip` (loopback trust proxy) → `req.socket.remoteAddress` → `'unknown'`.
 - `X-Forwarded-For` de l'extérieur est ignoré (trust proxy = `loopback` uniquement).
-- `source_port = NULL` derrière Cloudflare Tunnel (port TCP non disponible).
 - Validation `net.isIP()` + longueur max 45.
+
+**Port source** (`resolveSourcePort`) : capture `req.socket.remotePort` lorsqu'il existe, **en accès direct comme derrière un proxy**. Un port n'est jamais inventé ; s'il n'y a aucun port réel, `NULL` est conservé.
+
+⚠️ **Interprétation derrière Cloudflare Tunnel** : Cloudflare ne transmet **jamais** le port TCP source réel du client. Le port capté derrière un tunnel est donc le port interne de la connexion locale (cloudflared → origin), une socket éphémère sans signification — ce **n'est pas** le port du client. Le port source TCP d'un client web est de toute façon éphémère (port aléatoire, différent à chaque connexion) : il n'est **pas un identifiant stable** d'un utilisateur. L'IP reste l'identifiant réseau fiable à privilégier.
 
 ## XSS / Rendu Markdown (Phase 8)
 

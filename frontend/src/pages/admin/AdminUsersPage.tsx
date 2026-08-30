@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listUsers, createUser, updateUser, setUserStatus, resetPassword } from '../../services/admin.service.ts';
-import type { UserAdminQuery, CreateUserInput } from '../../types/admin.ts';
+import { listUsers, createUser, updateUser, setUserStatus, resetPassword, getUserLoginHistory } from '../../services/admin.service.ts';
+import type { UserAdminQuery, CreateUserInput, LoginHistoryEntry, LoginHistoryQuery } from '../../types/admin.ts';
 import { getApiErrorMessage } from '../../utils/error.ts';
 import { formatDate } from '../../utils/format.ts';
 
@@ -11,6 +11,7 @@ export default function AdminUsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<{ id: string; username: string; email: string; first_name: string | null; last_name: string | null; role: 'USER' | 'ADMIN' } | null>(null);
   const [resetId, setResetId] = useState<string | null>(null);
+  const [loginUser, setLoginUser] = useState<{ id: string; username: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -121,6 +122,8 @@ export default function AdminUsersPage() {
                       </button>
                       <button type="button" onClick={() => setResetId(resetId === u.id ? null : u.id)}
                         className="text-xs text-blue-400 hover:underline">Reset MDP</button>
+                      <button type="button" onClick={() => setLoginUser({ id: u.id, username: u.username })}
+                        className="text-xs text-violet-400 hover:underline">Connexions</button>
                     </div>
                     {resetId === u.id && (
                       <ResetPasswordForm
@@ -160,6 +163,14 @@ export default function AdminUsersPage() {
           isPending={createMutation.isPending || updateMutation.isPending}
         />
       )}
+
+      {loginUser && (
+        <LoginHistoryModal
+          userId={loginUser.id}
+          username={loginUser.username}
+          onClose={() => setLoginUser(null)}
+        />
+      )}
     </section>
   );
 }
@@ -173,6 +184,138 @@ function ResetPasswordForm({ onSubmit, onCancel, isPending }: { onSubmit: (p: st
       <button type="button" disabled={isPending || password.length < 8} onClick={() => onSubmit(password)}
         className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500 disabled:opacity-50">OK</button>
       <button type="button" onClick={onCancel} className="text-xs text-slate-400 hover:text-slate-200">Annuler</button>
+    </div>
+  );
+}
+
+function resultLabel(result: LoginHistoryEntry['result']): string {
+  switch (result) {
+    case 'SUCCESS': return 'Connexion';
+    case 'FAILURE': return 'Echec';
+    case 'LOGOUT': return 'Deconnexion';
+    default: return result;
+  }
+}
+
+function resultColor(result: LoginHistoryEntry['result']): string {
+  switch (result) {
+    case 'SUCCESS': return 'bg-green-500/20 text-green-300';
+    case 'FAILURE': return 'bg-red-500/20 text-red-300';
+    case 'LOGOUT': return 'bg-slate-700 text-slate-300';
+    default: return 'bg-slate-700 text-slate-300';
+  }
+}
+
+type LoginHistoryPageQuery = Omit<LoginHistoryQuery, 'page'> & { page: number };
+
+function LoginHistoryModal({ userId, username, onClose }: { userId: string; username: string; onClose: () => void }) {
+  const [query, setQuery] = useState<LoginHistoryPageQuery>({ page: 1, pageSize: 10 });
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['admin-user-login-history', userId, query],
+    queryFn: () => getUserLoginHistory(userId, query),
+    enabled: !!userId,
+  });
+
+  const entries = data?.data ?? [];
+  const pagination = data?.pagination;
+  const latest = entries[0];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-lg bg-slate-800 p-6 shadow-xl">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-amber-400">Connexions de {username}</h2>
+            <p className="mt-1 text-sm text-slate-400">Historique des connexions, horaires, adresses IP et ports source.</p>
+          </div>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-200" aria-label="Fermer">&times;</button>
+        </div>
+
+        {isPending ? (
+          <p className="text-slate-400">Chargement...</p>
+        ) : isError ? (
+          <p className="rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">Impossible de charger l'historique de connexion.</p>
+        ) : entries.length === 0 ? (
+          <p className="text-slate-400">Aucune connexion enregistree pour cet utilisateur.</p>
+        ) : (
+          <>
+            <div className="mb-4 rounded-md bg-slate-900 p-4">
+              <h3 className="mb-2 text-sm font-semibold text-slate-200">Derniere connexion</h3>
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                <div>
+                  <dt className="text-xs text-slate-500">Horaire</dt>
+                  <dd className="text-slate-100">{formatDate(latest.created_at)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Adresse IP publique</dt>
+                  <dd className="font-mono text-slate-100">{latest.ip ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Port source</dt>
+                  <dd className="font-mono text-slate-100">{latest.source_port ?? 'Non disponible'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Resultat</dt>
+                  <dd><span className={`rounded px-2 py-0.5 text-xs ${resultColor(latest.result)}`}>{resultLabel(latest.result)}</span></dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Acces</dt>
+                  <dd className="text-slate-100">{latest.access_type}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Navigateur</dt>
+                  <dd className="truncate text-slate-100" title={latest.user_agent ?? ''}>{latest.user_agent ?? '—'}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700 text-slate-400">
+                    <th className="px-3 py-2">Horaire</th>
+                    <th className="px-3 py-2">IP publique</th>
+                    <th className="px-3 py-2">Port</th>
+                    <th className="px-3 py-2">Resultat</th>
+                    <th className="px-3 py-2">Acces</th>
+                    <th className="px-3 py-2">Navigateur</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((e) => (
+                    <tr key={e.id} className="border-b border-slate-800 hover:bg-slate-800/50">
+                      <td className="px-3 py-2 text-slate-300">{formatDate(e.created_at)}</td>
+                      <td className="px-3 py-2 font-mono text-slate-100">{e.ip ?? '—'}</td>
+                      <td className="px-3 py-2 font-mono text-slate-300">{e.source_port ?? 'N/A'}</td>
+                      <td className="px-3 py-2"><span className={`rounded px-2 py-0.5 text-xs ${resultColor(e.result)}`}>{resultLabel(e.result)}</span></td>
+                      <td className="px-3 py-2 text-slate-300">{e.access_type}</td>
+                      <td className="max-w-[12rem] truncate px-3 py-2 text-slate-400" title={e.user_agent ?? ''}>{e.user_agent ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {pagination && pagination.totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-xs text-slate-500">{pagination.total} connexion(s)</span>
+                <div className="flex gap-2">
+                  <button type="button" disabled={query.page <= 1} onClick={() => setQuery({ ...query, page: query.page - 1 })}
+                    className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-600 disabled:opacity-40">
+                    Precedent
+                  </button>
+                  <span className="px-2 py-1 text-xs text-slate-400">Page {query.page} / {pagination.totalPages}</span>
+                  <button type="button" disabled={query.page >= pagination.totalPages} onClick={() => setQuery({ ...query, page: query.page + 1 })}
+                    className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-600 disabled:opacity-40">
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

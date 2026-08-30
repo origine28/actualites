@@ -48,17 +48,20 @@ export function resolveClientIp(req: Request): string {
 }
 
 /**
- * Port TCP source réel.
+ * Port TCP source.
  *
- * Derrière Cloudflare Tunnel, le port source du client Internet n'est pas
- * disponible → NULL (jamais inventé). Seul un accès local direct expose un
- * port TCP source réel (`req.socket.remotePort`).
+ * En accès local direct, `req.socket.remotePort` est le port TCP client réel
+ * et il est capturé tel quel.
+ *
+ * Derrière Cloudflare Tunnel, le port TCP source du client Internet n'est
+ * pas transmis par Cloudflare : on ne peut donc capturer que le port de la
+ * connexion locale au tunnel (127.0.0.1:port), pas celui du client distant.
+ * Plutôt que de renvoyer systématiquement `NULL`, on capture ce port quand
+ * il est disponible (`remotePort`), tout en le documentant comme « port de
+ * l'extrémité vue par l'application ». Un port n'est jamais inventé : s'il
+ * n'existe aucun port réel, `NULL` est conservé.
  */
 export function resolveSourcePort(req: Request): number | null {
-  const proxied =
-    (typeof req.headers['cf-connecting-ip'] === 'string' && req.headers['cf-connecting-ip'].length > 0) ||
-    (typeof req.headers['x-forwarded-for'] === 'string' && req.headers['x-forwarded-for'].length > 0);
-  if (proxied) return null;
   const port = req.socket?.remotePort;
   return typeof port === 'number' && port > 0 ? port : null;
 }

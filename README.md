@@ -64,6 +64,7 @@ npm run dev
 - Telechargements (PDF, mobiles, desktops, admin CRUD)
 - Contact (formulaire USER, moderation ADMIN)
 - Administration (utilisateurs, articles, categories, tags, medias, telechargements, contacts)
+- Historique de connexions par utilisateur (admin) : horaire exact, IP publique, port source, resultat, acces, navigateur (voir [docs/rapports/modif-connexions-admin.md](docs/rapports/modif-connexions-admin.md))
 - Securite (Argon2id, sessions, CSRF, CSP, rate limiting, audit)
 
 ### Limitations

@@ -51,7 +51,7 @@ describe('GET /api/admin/users/:id/login-history (historique cible)', () => {
 
       const success = res.body.data.find((e: { result: string }) => e.result === 'SUCCESS');
       expect(success.ip).toBe(SPOOF_IP);
-      expect(success.source_port).toBeNull();
+      expect(typeof success.source_port).toBe('number');
       expect(success.access_type).toBe('USER');
       expect(success.session_id_masked).toMatch(/^[a-f0-9]{8}\.\.\.$/);
 

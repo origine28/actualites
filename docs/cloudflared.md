@@ -25,7 +25,7 @@ PostgreSQL + storage/
 - **HTTPS fourni par Cloudflare** (certificat géré automatiquement).
 - **Firewall Windows** : backend en écoute `127.0.0.1` uniquement + règle bloquant l'accès externe.
 - **IP réelle** : `CF-Connecting-IP` (posé/écrasé par Cloudflare ; seul cloudflared atteint l'app via loopback → pas de falsification possible).
-- **`source_port` = NULL** en production (le port TCP client est invisible ; jamais reconstruit).
+- **Port source** : le port TCP client réel est **invisible** à travers le tunnel (Cloudflare ne le transmet pas). L'application capture le port de la socket qu'elle voit (`req.socket.remotePort`), c.-à-d. l'extrémité locale du tunnel — une valeur éphémère **sans signification** pour identifier un client. Jamais de port inventé : absent réellement → `NULL`.
 - **Règles de cache sécurisées** : contenu authentifié jamais mis en cache partagé (voir ci-dessous).
 
 ## Cache

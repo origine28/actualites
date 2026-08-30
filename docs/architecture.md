@@ -66,7 +66,7 @@ En production le backend sert les fichiers statiques du frontend (`frontend/dist
 - Médias : vidéos **externes** en V1 (provider validé), images stockées localement.
 - Téléchargements : modèles relationnels (`download_categories` + `type` + `platform`), SHA-256 stocké, servis uniquement via API authentifiée.
 - Cloudflare : **contenu authentifié = jamais de cache partagé** (`Cache-Control: private, no-store`) ; seuls les assets statiques hashés sont mis en cache.
-- IP : `CF-Connecting-IP` (jamais les headers du navigateur) ; `source_port = NULL` derrière le tunnel.
+- IP : `CF-Connecting-IP` (jamais les headers du navigateur). Port source : capture le port de la socket vue par l'app ; derrière le tunnel, c'est l'extrémité locale du tunnel (éphémère, non fiable pour identifier un client) — jamais un port inventé.
 - Tailles V1 : images 5 Mo, PDF 50 Mo, applications 100 Mo (limite applicative compatible Cloudflare Free/Pro, configurable). Fichiers >100 Mo : évolution future vers R2/upload direct (hors V1).
 
 ## Modèle de données (conceptuel)

@@ -29,3 +29,6 @@ logs/
 Thumbs.db
 .vite/
 .turbo/
+
+# Script de démarrage local (environnement Windows uniquement)
+demarrer.bat

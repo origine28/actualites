@@ -1,4 +1,5 @@
 import type { User } from '../src/types/auth.ts';
+import type { LoginHistoryEntry } from '../src/types/admin.ts';
 import type { GalleryItemView, ImageView, VideoView } from '../src/types/media.ts';
 import type { DownloadView, DownloadCategoryView } from '../src/types/download.ts';
 import type { ContactMessageView } from '../src/types/contact.ts';
@@ -14,6 +15,23 @@ export function makeUser(overrides: Partial<User> = {}): User {
     last_name: null,
     last_login_at: null,
     created_at: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  };
+}
+
+let loginLogSeq = 0;
+export function makeLoginHistoryEntry(overrides: Partial<LoginHistoryEntry> = {}): LoginHistoryEntry {
+  const id = overrides.id ?? `ll-${++loginLogSeq}`;
+  return {
+    id,
+    username: 'alice',
+    created_at: '2026-01-01T00:00:00.000Z',
+    ip: '203.0.113.7',
+    source_port: 54321,
+    result: 'SUCCESS',
+    access_type: 'USER',
+    user_agent: 'Mozilla/5.0 (test)',
+    session_id_masked: null,
     ...overrides,
   };
 }

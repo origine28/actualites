@@ -58,20 +58,20 @@ describe('Resolution IP (resolveClientIp)', () => {
 });
 
 describe('Port source (resolveSourcePort)', () => {
-  it('source_port = NULL derriere un tunnel (CF-Connecting-IP present)', () => {
+  it('capture le port du socket même derrière un tunnel (CF-Connecting-IP présent)', () => {
     const req = fakeRequest({
       headers: { 'cf-connecting-ip': '203.0.113.42' },
       socket: { remoteAddress: '127.0.0.1', remotePort: 12345 },
     });
-    expect(resolveSourcePort(req)).toBeNull();
+    expect(resolveSourcePort(req)).toBe(12345);
   });
 
-  it('source_port = NULL quand X-Forwarded-For est present', () => {
+  it('capture le port du socket quand X-Forwarded-For est présent', () => {
     const req = fakeRequest({
       headers: { 'x-forwarded-for': '203.0.113.42' },
       socket: { remoteAddress: '127.0.0.1', remotePort: 12345 },
     });
-    expect(resolveSourcePort(req)).toBeNull();
+    expect(resolveSourcePort(req)).toBe(12345);
   });
 
   it('source_port = port TCP réel en accès direct local', () => {
@@ -96,7 +96,7 @@ describe('User-Agent', () => {
 });
 
 describe('Intégration : IP et port enregistrés dans login_logs', () => {
-  it('CF-Connecting-IP est enregistre, le port source est NULL', async () => {
+  it('CF-Connecting-IP est enregistre (le port capte est celui du socket vu par l app)', async () => {
     const app = createTestApp();
     const { user } = await createUser();
     try {
@@ -115,7 +115,7 @@ describe('Intégration : IP et port enregistrés dans login_logs', () => {
       });
       expect(log).not.toBeNull();
       expect(log!.ip).toBe('203.0.113.99');
-      expect(log!.source_port).toBeNull();
+      expect(typeof log!.source_port).toBe('number');
     } finally {
       await cleanupUser(user.id);
     }
