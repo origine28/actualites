@@ -14,17 +14,17 @@ export default function ArticleDetailPage() {
 
   if (isPending) {
     return (
-      <section className="mx-auto max-w-3xl px-4 py-8">
-        <p className="text-slate-400">Chargement...</p>
+      <section className="mx-auto max-w-3xl">
+        <p className="text-fg-muted">Chargement…</p>
       </section>
     );
   }
 
   if (isError || !article) {
     return (
-      <section className="mx-auto max-w-3xl px-4 py-8">
-        <p className="text-red-400">Article introuvable.</p>
-        <Link to="/app/articles" className="mt-4 inline-block text-sm text-amber-400 hover:underline">
+      <section className="mx-auto max-w-3xl">
+        <p className="alert alert-error">Article introuvable.</p>
+        <Link to="/app/articles" className="link mt-4 inline-block">
           Retour aux articles
         </Link>
       </section>
@@ -32,8 +32,8 @@ export default function ArticleDetailPage() {
   }
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/app/articles" className="mb-4 inline-block text-sm text-amber-400 hover:underline">
+    <article className="mx-auto max-w-3xl space-y-6">
+      <Link to="/app/articles" className="link inline-flex items-center gap-1">
         &larr; Retour aux articles
       </Link>
 
@@ -41,43 +41,41 @@ export default function ArticleDetailPage() {
         <img
           src={article.featured_image.urls.large}
           alt={article.featured_image.alt || article.title}
-          className="mb-6 w-full rounded-lg object-cover"
+          className="w-full rounded-lg object-cover"
           style={{ maxHeight: 400 }}
         />
       )}
 
-      <h1 className="mb-3 text-3xl font-bold text-slate-100">{article.title}</h1>
-
-      <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-slate-400">
-        <span>{article.author.username}</span>
-        {article.published_at && <span>{formatDate(article.published_at)}</span>}
+      <header className="space-y-3">
         {article.category && (
-          <span className="rounded bg-slate-700 px-2 py-0.5 text-slate-300">{article.category.name}</span>
+          <span className="badge badge-accent">{article.category.name}</span>
         )}
-        {article.tags.map((t) => (
-          <span key={t.id} className="rounded bg-slate-700/50 px-2 py-0.5 text-slate-400">{t.name}</span>
-        ))}
-      </div>
+        <h1 className="page-title-lg">{article.title}</h1>
+        <div className="flex flex-wrap items-center gap-3 text-sm text-fg-muted">
+          <span className="font-medium text-fg-secondary">{article.author.username}</span>
+          {article.published_at && <span>{formatDate(article.published_at)}</span>}
+          {article.tags.map((t) => (
+            <span key={t.id} className="badge badge-neutral">{t.name}</span>
+          ))}
+        </div>
+      </header>
 
       {article.summary && (
-        <p className="mb-6 text-lg text-slate-300">{article.summary}</p>
+        <p className="text-lg leading-relaxed text-fg-secondary">{article.summary}</p>
       )}
 
-      <div
-        className="prose prose-invert max-w-none text-slate-200"
-        dangerouslySetInnerHTML={{ __html: article.content }}
-      />
+      <div className="article-body" dangerouslySetInnerHTML={{ __html: article.content }} />
 
       {article.gallery.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold text-slate-100">Galerie</h2>
+        <div className="pt-4">
+          <h2 className="mb-4 font-display text-xl font-bold text-fg">Galerie</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {article.gallery.map((item) => (
               <img
                 key={item.image.id}
                 src={item.image.urls.medium}
                 alt={item.image.alt || `Image ${item.position}`}
-                className="rounded-lg object-cover"
+                className="rounded object-cover"
                 loading="lazy"
               />
             ))}

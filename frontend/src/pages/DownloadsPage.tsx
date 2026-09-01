@@ -9,7 +9,7 @@ const TYPE_LABELS: Record<DownloadType, string> = { PDF: 'PDF', MOBILE: 'Mobile'
 const PLATFORM_LABELS: Record<DownloadPlatform, string> = {
   ANDROID: 'Android', IOS: 'iOS', WINDOWS: 'Windows', LINUX: 'Linux', MACOS: 'macOS', OTHER: 'Autre',
 };
-const TYPE_ICONS: Record<DownloadType, string> = { PDF: '📄', MOBILE: '📱', DESKTOP: '🖥️' };
+const TYPE_GLYPH: Record<DownloadType, string> = { PDF: 'P', MOBILE: 'M', DESKTOP: 'D' };
 
 export default function DownloadsPage() {
   const [query, setQuery] = useState<DownloadQuery>({ page: 1, pageSize: 20 });
@@ -32,25 +32,28 @@ export default function DownloadsPage() {
   const pagination = data?.pagination;
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold text-slate-100">Telechargements</h1>
-      <p className="mb-6 text-slate-400">PDF, applications et documents a telecharger.</p>
+    <section className="space-y-8">
+      <header>
+        <p className="kicker">Ressources</p>
+        <h1 className="page-title-lg">Téléchargements</h1>
+        <p className="page-subtitle mt-1">PDF, applications et documents à télécharger.</p>
+      </header>
 
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
       {/* Filtres */}
-      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="mb-6 flex flex-wrap gap-3">
+      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="flex flex-wrap gap-2">
         <input
           type="text"
           placeholder="Rechercher..."
           value={query.search ?? ''}
           onChange={(e) => setQuery({ ...query, search: e.target.value, page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+          className="input w-56"
         />
         <select
           value={query.type ?? ''}
           onChange={(e) => setQuery({ ...query, type: (e.target.value || undefined) as DownloadQuery['type'], page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100"
+          className="input w-auto"
         >
           <option value="">Tous les types</option>
           <option value="PDF">PDF</option>
@@ -60,7 +63,7 @@ export default function DownloadsPage() {
         <select
           value={query.platform ?? ''}
           onChange={(e) => setQuery({ ...query, platform: (e.target.value || undefined) as DownloadQuery['platform'], page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100"
+          className="input w-auto"
         >
           <option value="">Toutes les plateformes</option>
           <option value="ANDROID">Android</option>
@@ -72,21 +75,23 @@ export default function DownloadsPage() {
       </form>
 
       {isPending ? (
-        <p className="text-slate-400">Chargement...</p>
+        <p className="text-fg-muted">Chargement...</p>
       ) : downloads.length === 0 ? (
-        <p className="text-slate-400">Aucun telechargement disponible.</p>
+        <p className="text-fg-muted">Aucun telechargement disponible.</p>
       ) : (
         <div className="space-y-3">
           {downloads.map((d) => (
             <div
               key={d.id}
-              className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800/50 p-4 hover:bg-slate-800"
+              className="card card-hover flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
             >
               <div className="flex items-center gap-4">
-                <span className="text-2xl">{TYPE_ICONS[d.type]}</span>
-                <div>
-                  <h3 className="font-medium text-slate-100">{d.title}</h3>
-                  <div className="flex gap-3 text-xs text-slate-400">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-accent-soft font-mono text-lg font-bold text-accent">
+                  {TYPE_GLYPH[d.type]}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-display font-bold text-fg">{d.title}</h3>
+                  <div className="flex flex-wrap gap-3 text-xs text-fg-muted">
                     <span>{TYPE_LABELS[d.type]}</span>
                     <span>{PLATFORM_LABELS[d.platform]}</span>
                     {d.version && <span>v{d.version}</span>}
@@ -94,7 +99,7 @@ export default function DownloadsPage() {
                     {d.published_at && <span>{formatDate(d.published_at)}</span>}
                   </div>
                   {d.description && (
-                    <p className="mt-1 max-w-xl text-sm text-slate-500">{d.description}</p>
+                    <p className="mt-1 max-w-xl text-sm text-fg-secondary">{d.description}</p>
                   )}
                 </div>
               </div>
@@ -102,7 +107,7 @@ export default function DownloadsPage() {
                 type="button"
                 onClick={() => downloadMutation.mutate(d.id)}
                 disabled={downloadMutation.isPending}
-                className="shrink-0 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400 disabled:opacity-50"
+                className="btn btn-primary shrink-0"
               >
                 {downloadMutation.isPending ? '...' : 'Telecharger'}
               </button>
@@ -113,13 +118,13 @@ export default function DownloadsPage() {
 
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
+        <div className="flex justify-center gap-2">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setQuery({ ...query, page: p })}
-              className={`rounded px-3 py-1 text-sm ${p === query.page ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+              className={`page-btn ${p === query.page ? 'page-btn-active' : ''}`}
             >
               {p}
             </button>

@@ -76,15 +76,16 @@ export default function MediaImagesPage() {
   const pagination = data?.pagination;
 
   return (
-    <section>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-amber-400">Bibliothèque d&apos;images</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="kicker">Médiathèque</p>
+          <h1 className="page-title">Bibliothèque d&apos;images</h1>
+          <p className="page-subtitle mt-1">
             Les images sont ré-encodées et déclinées en variantes (thumb, medium, large) au moment de l&apos;import.
           </p>
         </div>
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50">
+        <label className="btn btn-primary inline-flex cursor-pointer items-center">
           {uploading ? 'Import en cours…' : 'Importer une image'}
           <input
             type="file"
@@ -96,37 +97,34 @@ export default function MediaImagesPage() {
         </label>
       </div>
 
-      <form onSubmit={handleSearchSubmit} className="mb-6 flex max-w-sm items-center gap-2">
+      <form onSubmit={handleSearchSubmit} className="flex max-w-sm items-center gap-2">
         <input
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Rechercher une image…"
-          className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+          className="input w-full"
         />
-        <button
-          type="submit"
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-600"
-        >
+        <button type="submit" className="btn btn-secondary">
           Rechercher
         </button>
       </form>
 
       {error && (
-        <p role="alert" className="mb-4 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <p role="alert" className="alert alert-error">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mb-4 rounded-md bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <p role="status" className="alert alert-success">
           {notice}
         </p>
       )}
 
-      {isPending && <p className="text-slate-400">Chargement…</p>}
-      {isError && <p className="text-red-400">Impossible de charger la bibliothèque.</p>}
+      {isPending && <p className="text-fg-muted">Chargement…</p>}
+      {isError && <p className="text-danger">Impossible de charger la bibliothèque.</p>}
       {data && data.data.length === 0 && (
-        <p className="rounded-md border border-dashed border-slate-700 px-4 py-10 text-center text-slate-500">
+        <p className="rounded-md border border-dashed border-edge-strong px-4 py-10 text-center text-fg-muted">
           Aucune image pour le moment.
         </p>
       )}
@@ -143,23 +141,23 @@ export default function MediaImagesPage() {
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-4 text-sm">
+        <div className="flex items-center justify-center gap-4 text-sm">
           <button
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md bg-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-600 disabled:opacity-40"
+            className={`page-btn ${page <= 1 ? 'page-btn-disabled' : ''}`}
           >
             Précédent
           </button>
-          <span className="text-slate-400">
+          <span className="text-fg-muted">
             Page {pagination.page} / {pagination.totalPages}
           </span>
           <button
             type="button"
             disabled={page >= pagination.totalPages}
             onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-            className="rounded-md bg-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-600 disabled:opacity-40"
+            className={`page-btn ${page >= pagination.totalPages ? 'page-btn-disabled' : ''}`}
           >
             Suivant
           </button>
@@ -179,8 +177,8 @@ function ImageCard({ image, onDelete, onAltSubmit }: ImageCardProps) {
   const [altDraft, setAltDraft] = useState(image.alt);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-700 bg-slate-800">
-      <div className="flex h-36 items-center justify-center bg-slate-900">
+    <article className="overflow-hidden rounded-md border border-edge bg-surface-muted">
+      <div className="flex h-36 items-center justify-center bg-inset">
         <img
           src={image.urls.thumb}
           alt={image.alt || image.original_name}
@@ -189,10 +187,10 @@ function ImageCard({ image, onDelete, onAltSubmit }: ImageCardProps) {
         />
       </div>
       <div className="space-y-2 p-3 text-sm">
-        <p className="truncate text-slate-200" title={image.original_name}>
+        <p className="truncate text-fg" title={image.original_name}>
           {image.original_name}
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-fg-muted">
           {image.width} × {image.height} · {formatFileSize(image.size_bytes)} · {formatDate(image.created_at)}
         </p>
         <form
@@ -209,19 +207,16 @@ function ImageCard({ image, onDelete, onAltSubmit }: ImageCardProps) {
             onChange={(event) => setAltDraft(event.target.value)}
             aria-label="Texte alternatif"
             placeholder="Texte alternatif"
-            className="w-full rounded border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+            className="input px-2 py-1 text-xs"
           />
-          <button
-            type="submit"
-            className="rounded border border-slate-600 px-2 py-1 text-xs text-slate-200 hover:bg-slate-700"
-          >
+          <button type="submit" className="btn btn-secondary btn-sm">
             OK
           </button>
         </form>
         <button
           type="button"
           onClick={onDelete}
-          className="w-full rounded border border-red-500/40 px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
+          className="btn btn-danger btn-sm w-full"
         >
           Supprimer
         </button>

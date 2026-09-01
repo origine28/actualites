@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { DownloadController } from '../controllers/download.controller.ts';
 import { csrfProtect } from '../middleware/csrf.ts';
 import { noStore } from '../middleware/noStore.ts';
+import { optionalAuth } from '../middleware/optionalAuth.ts';
 import { requireAuth } from '../middleware/requireAuth.ts';
 import { requireRole } from '../middleware/requireRole.ts';
 import { handleUploadError, uploadSingleDownload } from '../middleware/upload.ts';
@@ -43,11 +44,9 @@ export function createDownloadAdminRouter(deps: DownloadRouterDeps): Router {
 export function createDownloadPublicRouter(deps: DownloadRouterDeps): Router {
   const router = Router();
 
-  // Liste publique des téléchargements publiés
-  router.get('/downloads', requireAuth, deps.controller.listPublicDownloads);
-
-  // Téléchargement du fichier (authentifié)
-  router.get('/downloads/:id/file', requireAuth, deps.controller.downloadFile);
+  router.use(optionalAuth);
+  router.get('/downloads', deps.controller.listPublicDownloads);
+  router.get('/downloads/:id/file', deps.controller.downloadFile);
 
   return router;
 }

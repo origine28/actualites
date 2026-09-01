@@ -168,7 +168,7 @@ export function createDownloadController(cfg: DownloadControllerConfig) {
 
   async function downloadFile(req: Request, res: Response): Promise<void> {
     const id = requireId(req);
-    const user = requireActor(req);
+    const user = req.auth?.user ?? null;
     const result = await cfg.downloadService.downloadFile(user, id, clientInfo(req).ip);
     if (!result) {
       throw new ApiError(404, 'DOWNLOAD_NOT_FOUND', 'Fichier introuvable');

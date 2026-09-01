@@ -28,37 +28,40 @@ export default function ArticlesPage() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold text-slate-100">Actualites</h1>
-      <p className="mb-6 text-slate-400">Dernieres nouvelles et articles publies.</p>
+    <section className="space-y-8">
+      <header>
+        <p className="kicker">La rédaction</p>
+        <h1 className="page-title-lg">Actualités</h1>
+        <p className="page-subtitle mt-1">Dernières nouvelles et articles publiés.</p>
+      </header>
 
-      <form onSubmit={handleSearch} className="mb-6 flex flex-wrap gap-3">
+      <form onSubmit={handleSearch} className="flex flex-wrap gap-2">
         <input
           type="text"
-          placeholder="Rechercher un article..."
+          placeholder="Rechercher un article…"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+          className="input w-64"
         />
         <select
           value={query.category ?? ''}
           onChange={(e) => setQuery((prev) => ({ ...prev, category: e.target.value || undefined, page: 1 }))}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100"
+          className="input w-auto"
         >
-          <option value="">Toutes les categories</option>
+          <option value="">Toutes les catégories</option>
           {categories?.map((c) => (
             <option key={c.id} value={c.slug}>{c.name}</option>
           ))}
         </select>
-        <button type="submit" className="rounded-md bg-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-600">
+        <button type="submit" className="btn btn-secondary">
           Rechercher
         </button>
       </form>
 
-      {isPending && <p className="text-slate-400">Chargement...</p>}
-      {isError && <p className="text-red-400">Impossible de charger les articles.</p>}
+      {isPending && <p className="text-fg-muted">Chargement…</p>}
+      {isError && <p className="alert alert-error">Impossible de charger les articles.</p>}
       {!isPending && !isError && articles.length === 0 && (
-        <p className="text-slate-400">Aucun article publie.</p>
+        <p className="text-fg-muted">Aucun article publié.</p>
       )}
 
       <div className="space-y-4">
@@ -66,7 +69,7 @@ export default function ArticlesPage() {
           <Link
             key={article.id}
             to={`/app/articles/${article.slug}`}
-            className="block rounded-lg border border-slate-700 bg-slate-800/50 p-5 transition hover:bg-slate-800"
+            className="card card-hover block"
           >
             <div className="flex gap-4">
               {article.featured_image && (
@@ -77,14 +80,16 @@ export default function ArticlesPage() {
                 />
               )}
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-lg font-semibold text-slate-100">{article.title}</h2>
+                <h2 className="truncate font-display text-lg font-bold text-fg">{article.title}</h2>
                 {article.summary && (
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-400">{article.summary}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-fg-secondary">{article.summary}</p>
                 )}
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                  {article.category && <span className="rounded bg-slate-700 px-2 py-0.5 text-slate-300">{article.category.name}</span>}
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-fg-muted">
+                  {article.category && (
+                    <span className="badge badge-accent">{article.category.name}</span>
+                  )}
                   {article.tags.map((t) => (
-                    <span key={t.id} className="rounded bg-slate-700/50 px-2 py-0.5 text-slate-400">{t.name}</span>
+                    <span key={t.id} className="badge badge-neutral">{t.name}</span>
                   ))}
                   <span>{article.author.username}</span>
                   {article.published_at && <span>{formatDate(article.published_at)}</span>}
@@ -96,13 +101,13 @@ export default function ArticlesPage() {
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
+        <div className="flex justify-center gap-2">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setQuery((prev) => ({ ...prev, page: p }))}
-              className={`rounded px-3 py-1 text-sm ${p === query.page ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+              className={`page-btn ${p === query.page ? 'page-btn-active' : ''}`}
             >
               {p}
             </button>

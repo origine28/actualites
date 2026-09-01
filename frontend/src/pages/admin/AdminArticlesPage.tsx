@@ -6,10 +6,10 @@ import type { ArticleQuery } from '../../types/content.ts';
 import { getApiErrorMessage } from '../../utils/error.ts';
 import { formatDate } from '../../utils/format.ts';
 
-const STATUS_COLORS: Record<string, string> = {
-  DRAFT: 'bg-yellow-500/20 text-yellow-300',
-  PUBLISHED: 'bg-green-500/20 text-green-300',
-  ARCHIVED: 'bg-slate-500/20 text-slate-400',
+const STATUS_BADGES: Record<string, string> = {
+  DRAFT: 'badge-warning',
+  PUBLISHED: 'badge-success',
+  ARCHIVED: 'badge-neutral',
 };
 
 export default function AdminArticlesPage() {
@@ -42,27 +42,27 @@ export default function AdminArticlesPage() {
   const pagination = data?.pagination;
 
   return (
-    <section>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-amber-400">Articles</h1>
-          <p className="mt-1 text-sm text-slate-400">Gestion des articles.</p>
+          <p className="kicker">Contenu</p>
+          <h1 className="page-title">Articles</h1>
+          <p className="page-subtitle mt-1">Gestion des articles.</p>
         </div>
-        <button type="button" onClick={() => navigate('/admin/articles/new')}
-          className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400">
+        <button type="button" onClick={() => navigate('/admin/articles/new')} className="btn btn-primary">
           + Nouveau
         </button>
       </div>
 
-      {notice && <p className="mb-4 rounded-md bg-green-500/10 px-4 py-2 text-sm text-green-400">{notice}</p>}
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="alert alert-success">{notice}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
-      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="mb-4 flex flex-wrap gap-3">
+      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="flex flex-wrap gap-2">
         <input type="text" placeholder="Rechercher..." value={query.search ?? ''}
           onChange={(e) => setQuery({ ...query, search: e.target.value || undefined, page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500" />
+          className="input w-56" />
         <select value={query.status ?? ''} onChange={(e) => setQuery({ ...query, status: (e.target.value || undefined) as ArticleQuery['status'], page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100">
+          className="input w-auto">
           <option value="">Tous les statuts</option>
           <option value="DRAFT">Brouillon</option>
           <option value="PUBLISHED">Publie</option>
@@ -70,47 +70,49 @@ export default function AdminArticlesPage() {
         </select>
       </form>
 
-      {isPending ? <p className="text-slate-400">Chargement...</p> : articles.length === 0 ? (
-        <p className="text-slate-400">Aucun article.</p>
+      {isPending ? (
+        <p className="text-fg-muted">Chargement...</p>
+      ) : articles.length === 0 ? (
+        <p className="text-fg-muted">Aucun article.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-slate-700 text-slate-400">
-                <th className="px-3 py-2">Titre</th>
-                <th className="px-3 py-2">Auteur</th>
-                <th className="px-3 py-2">Categorie</th>
-                <th className="px-3 py-2">Statut</th>
-                <th className="px-3 py-2">Publie le</th>
-                <th className="px-3 py-2">Actions</th>
+              <tr>
+                <th>Titre</th>
+                <th>Auteur</th>
+                <th>Categorie</th>
+                <th>Statut</th>
+                <th>Publie le</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {articles.map((a) => (
-                <tr key={a.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                  <td className="px-3 py-2 font-medium text-slate-100">{a.title}</td>
-                  <td className="px-3 py-2 text-slate-300">{a.author.username}</td>
-                  <td className="px-3 py-2 text-slate-300">{a.category?.name ?? '—'}</td>
-                  <td className="px-3 py-2"><span className={`rounded px-2 py-1 text-xs font-medium ${STATUS_COLORS[a.status]}`}>{a.status}</span></td>
-                  <td className="px-3 py-2 text-slate-400">{formatDate(a.published_at)}</td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap gap-2">
+                <tr key={a.id}>
+                  <td><strong>{a.title}</strong></td>
+                  <td>{a.author.username}</td>
+                  <td>{a.category?.name ?? '—'}</td>
+                  <td><span className={`badge ${STATUS_BADGES[a.status] ?? 'badge-neutral'}`}>{a.status}</span></td>
+                  <td className="mono">{formatDate(a.published_at)}</td>
+                  <td>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
                       <button type="button" onClick={() => navigate(`/admin/articles/${a.id}/edit`)}
-                        className="text-xs text-amber-400 hover:underline">Modifier</button>
+                        className="cursor-pointer font-semibold text-accent hover:text-accent-strong">Modifier</button>
                       {a.status === 'DRAFT' && (
                         <button type="button" onClick={() => statusMutation.mutate({ id: a.id, status: 'PUBLISHED' })}
-                          className="text-xs text-green-400 hover:underline">Publier</button>
+                          className="cursor-pointer font-semibold text-success hover:underline">Publier</button>
                       )}
                       {a.status === 'PUBLISHED' && (
                         <button type="button" onClick={() => statusMutation.mutate({ id: a.id, status: 'ARCHIVED' })}
-                          className="text-xs text-orange-400 hover:underline">Archiver</button>
+                          className="cursor-pointer font-semibold text-warning hover:underline">Archiver</button>
                       )}
                       {a.status === 'ARCHIVED' && (
                         <button type="button" onClick={() => statusMutation.mutate({ id: a.id, status: 'PUBLISHED' })}
-                          className="text-xs text-green-400 hover:underline">Republier</button>
+                          className="cursor-pointer font-semibold text-success hover:underline">Republier</button>
                       )}
                       <button type="button" onClick={() => { if (confirm('Supprimer cet article ?')) deleteMutation.mutate(a.id); }}
-                        className="text-xs text-red-400 hover:underline">Supprimer</button>
+                        className="cursor-pointer font-semibold text-danger hover:underline">Supprimer</button>
                     </div>
                   </td>
                 </tr>
@@ -121,10 +123,10 @@ export default function AdminArticlesPage() {
       )}
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
+        <div className="flex justify-center gap-2">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
             <button key={p} type="button" onClick={() => setQuery({ ...query, page: p })}
-              className={`rounded px-3 py-1 text-sm ${p === query.page ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>{p}</button>
+              className={`page-btn ${p === query.page ? 'page-btn-active' : ''}`}>{p}</button>
           ))}
         </div>
       )}

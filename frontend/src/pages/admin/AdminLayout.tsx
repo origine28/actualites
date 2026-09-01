@@ -1,16 +1,17 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import ThemeToggle from '../../components/ThemeToggle.tsx';
 import { logout } from '../../services/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 
 const navItems = [
   { to: '/admin/users', label: 'Utilisateurs' },
   { to: '/admin/articles', label: 'Articles' },
-  { to: '/admin/categories', label: 'Categories' },
+  { to: '/admin/categories', label: 'Catégories' },
   { to: '/admin/tags', label: 'Tags' },
   { to: '/admin/images', label: 'Images' },
-  { to: '/admin/videos', label: 'Videos' },
-  { to: '/admin/downloads', label: 'Telechargements' },
+  { to: '/admin/videos', label: 'Vidéos' },
+  { to: '/admin/downloads', label: 'Téléchargements' },
   { to: '/admin/contact', label: 'Contact' },
 ];
 
@@ -29,21 +30,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      <header className="border-b border-slate-700 bg-slate-800/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/admin/images" className="text-lg font-bold text-amber-400">
+    <div className="min-h-screen bg-canvas text-fg">
+      <header className="border-b border-edge bg-canvas/85 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 md:px-6">
+          <Link
+            to="/admin/images"
+            className="font-display text-lg font-bold tracking-tight text-accent transition-colors hover:text-accent-strong"
+          >
             Administration
           </Link>
-          <nav className="flex items-center gap-1">
+          <nav className="flex flex-wrap items-center gap-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   isActive
-                    ? 'rounded-md bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-300'
-                    : 'rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-slate-100'
+                    ? 'rounded-sm bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-strong'
+                    : 'rounded-sm px-3 py-2 text-sm text-fg-secondary transition-colors hover:bg-control hover:text-fg'
                 }
               >
                 {item.label}
@@ -51,18 +55,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-400">{user?.username}</span>
+            <span className="hidden text-sm text-fg-muted sm:inline">{user?.username}</span>
+            <ThemeToggle />
+            <Link to="/" className="btn btn-ghost btn-sm">
+              Site public
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700"
+              className="btn btn-secondary btn-sm"
             >
               Déconnexion
             </button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-6 md:px-6">{children}</main>
     </div>
   );
 }

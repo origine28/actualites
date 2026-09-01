@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import Brand from '../components/Brand.tsx';
+import ThemeToggle from '../components/ThemeToggle.tsx';
 import { getHealth } from '../services/api.ts';
 
 export default function HomePage() {
@@ -9,24 +11,60 @@ export default function HomePage() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-900 text-slate-100">
-      <h1 className="text-3xl font-bold">SITE NEWS</h1>
-      <p className="text-slate-400">Plateforme d'actualites</p>
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-40 border-b border-edge bg-canvas/85 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 md:px-6">
+          <Brand to="/" />
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="btn btn-ghost btn-sm">
+              Connexion
+            </Link>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
 
-      {isPending && <p className="text-slate-400">Verification du backend...</p>}
-      {isError && <p className="text-red-400">Backend injoignable — /api/health</p>}
-      {data && (
-        <p className="rounded bg-slate-800 px-4 py-2 text-emerald-400">
-          Backend : {data.status}
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+        <p className="kicker mb-4">L&apos;actualité en continu</p>
+        <h1 className="font-display text-5xl font-black tracking-tight text-fg md:text-7xl">
+          SITE NEWS
+        </h1>
+        <p className="mt-4 max-w-xl text-lg text-fg-secondary">
+          Plateforme d&apos;actualités — information vérifiée, mise en perspective.
         </p>
-      )}
 
-      <Link
-        to="/login"
-        className="rounded bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-500"
-      >
-        Connexion
-      </Link>
-    </main>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <Link to="/login" className="btn btn-primary">
+            Se connecter
+          </Link>
+          <Link to="/downloads" className="btn btn-secondary">
+            Téléchargements
+          </Link>
+        </div>
+
+        <div className="mt-14 min-h-8">
+          {isPending && (
+            <p className="text-sm text-fg-muted">Vérification du backend…</p>
+          )}
+          {isError && (
+            <p role="alert" className="alert alert-error">
+              Backend injoignable — /api/health
+            </p>
+          )}
+          {data && (
+            <p className="badge badge-success">Backend : {data.status}</p>
+          )}
+        </div>
+      </main>
+
+      <footer className="border-t border-edge py-6">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 text-sm text-fg-muted md:px-6">
+          <span>Site News © 2026</span>
+          <Link to="/login" className="link">
+            Espace de travail
+          </Link>
+        </div>
+      </footer>
+    </div>
   );
 }

@@ -32,49 +32,50 @@ export default function AdminTagsPage() {
   const tags = data?.data ?? [];
 
   return (
-    <section>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-amber-400">Tags</h1>
-        <p className="mt-1 text-sm text-slate-400">Gestion des tags de contenu.</p>
+    <section className="space-y-6">
+      <div>
+        <p className="kicker">Contenu</p>
+        <h1 className="page-title">Tags</h1>
+        <p className="page-subtitle mt-1">Gestion des tags de contenu.</p>
       </div>
 
-      {notice && <p className="mb-4 rounded-md bg-green-500/10 px-4 py-2 text-sm text-green-400">{notice}</p>}
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="alert alert-success">{notice}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
       <form onSubmit={(e) => { e.preventDefault(); if (newName.trim()) createMutation.mutate({ name: newName.trim() }); }}
-        className="mb-6 flex gap-3">
-        <input type="text" placeholder="Nouveau tag" value={newName} onChange={(e) => setNewName(e.target.value)} required
-          className="flex-1 rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500" />
-        <button type="submit" disabled={createMutation.isPending}
-          className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400 disabled:opacity-50">
+        className="flex max-w-md gap-3">
+        <input type="text" placeholder="Nouveau tag" value={newName} onChange={(e) => setNewName(e.target.value)} required className="input flex-1" />
+        <button type="submit" disabled={createMutation.isPending} className="btn btn-primary">
           {createMutation.isPending ? '...' : 'Ajouter'}
         </button>
       </form>
 
-      {isPending ? <p className="text-slate-400">Chargement...</p> : tags.length === 0 ? (
-        <p className="text-slate-400">Aucun tag.</p>
+      {isPending ? (
+        <p className="text-fg-muted">Chargement...</p>
+      ) : tags.length === 0 ? (
+        <p className="text-fg-muted">Aucun tag.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-slate-700 text-slate-400">
-                <th className="px-3 py-2">Nom</th>
-                <th className="px-3 py-2">Slug</th>
-                <th className="px-3 py-2">Articles</th>
-                <th className="px-3 py-2">Cree le</th>
-                <th className="px-3 py-2">Actions</th>
+              <tr>
+                <th>Nom</th>
+                <th>Slug</th>
+                <th>Articles</th>
+                <th>Cree le</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {tags.map((t) => (
-                <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                  <td className="px-3 py-2 font-medium text-slate-100">{t.name}</td>
-                  <td className="px-3 py-2 text-slate-300">{t.slug}</td>
-                  <td className="px-3 py-2 text-slate-300">{t.articles_count}</td>
-                  <td className="px-3 py-2 text-slate-400">{formatDate(t.created_at)}</td>
-                  <td className="px-3 py-2">
+                <tr key={t.id}>
+                  <td><strong>{t.name}</strong></td>
+                  <td className="mono">{t.slug}</td>
+                  <td>{t.articles_count}</td>
+                  <td className="mono">{formatDate(t.created_at)}</td>
+                  <td>
                     <button type="button" onClick={() => { if (confirm('Supprimer ce tag ?')) deleteMutation.mutate(t.id); }}
-                      className="text-xs text-red-400 hover:underline">Supprimer</button>
+                      className="cursor-pointer text-xs font-semibold text-danger hover:underline">Supprimer</button>
                   </td>
                 </tr>
               ))}

@@ -39,16 +39,19 @@ export default function ContactPage() {
   }
 
   return (
-    <section className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold text-slate-100">Contact</h1>
-      <p className="mb-6 text-slate-400">Envoyez-nous un message.</p>
+    <section className="mx-auto max-w-2xl space-y-8">
+      <header>
+        <p className="kicker">La rédaction</p>
+        <h1 className="page-title-lg">Contact</h1>
+        <p className="page-subtitle mt-1">Envoyez-nous un message.</p>
+      </header>
 
-      {notice && <p className="mb-4 rounded-md bg-green-500/10 px-4 py-2 text-sm text-green-400">{notice}</p>}
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="alert alert-success">{notice}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="contact-name" className="mb-1 block text-sm text-slate-400">Nom</label>
+      <form onSubmit={handleSubmit} className="card space-y-4">
+        <div className="field">
+          <label htmlFor="contact-name" className="field-label">Nom</label>
           <input
             id="contact-name"
             type="text"
@@ -57,11 +60,11 @@ export default function ContactPage() {
             value={form.name}
             onChange={(e) => updateField('name', e.target.value)}
             placeholder="Votre nom"
-            className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+            className="input"
           />
         </div>
-        <div>
-          <label htmlFor="contact-email" className="mb-1 block text-sm text-slate-400">Email</label>
+        <div className="field">
+          <label htmlFor="contact-email" className="field-label">Email</label>
           <input
             id="contact-email"
             type="email"
@@ -70,11 +73,11 @@ export default function ContactPage() {
             value={form.email}
             onChange={(e) => updateField('email', e.target.value)}
             placeholder="votre@email.fr"
-            className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+            className="input"
           />
         </div>
-        <div>
-          <label htmlFor="contact-subject" className="mb-1 block text-sm text-slate-400">Sujet</label>
+        <div className="field">
+          <label htmlFor="contact-subject" className="field-label">Sujet</label>
           <input
             id="contact-subject"
             type="text"
@@ -83,11 +86,11 @@ export default function ContactPage() {
             value={form.subject}
             onChange={(e) => updateField('subject', e.target.value)}
             placeholder="Sujet du message"
-            className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+            className="input"
           />
         </div>
-        <div>
-          <label htmlFor="contact-message" className="mb-1 block text-sm text-slate-400">Message</label>
+        <div className="field">
+          <label htmlFor="contact-message" className="field-label">Message</label>
           <textarea
             id="contact-message"
             required
@@ -97,13 +100,13 @@ export default function ContactPage() {
             value={form.message}
             onChange={(e) => updateField('message', e.target.value)}
             placeholder="Votre message (10 caracteres minimum)"
-            className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
+            className="input"
           />
         </div>
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="rounded-md bg-amber-500 px-6 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400 disabled:opacity-50"
+          className="btn btn-primary"
         >
           {mutation.isPending ? 'Envoi...' : 'Envoyer'}
         </button>

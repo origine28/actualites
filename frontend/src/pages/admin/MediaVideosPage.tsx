@@ -56,21 +56,22 @@ export default function MediaVideosPage() {
   const pagination = data?.pagination;
 
   return (
-    <section>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-amber-400">Vidéos</h1>
-        <p className="mt-1 text-sm text-slate-400">
+    <section className="space-y-6">
+      <div>
+        <p className="kicker">Médiathèque</p>
+        <h1 className="page-title">Vidéos</h1>
+        <p className="page-subtitle mt-1">
           YouTube et Vimeo uniquement. L&apos;URL fournie est normalisée en URL d&apos;intégration.
         </p>
       </div>
 
       {error && (
-        <p role="alert" className="mb-4 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <p role="alert" className="alert alert-error">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mb-4 rounded-md bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <p role="status" className="alert alert-success">
           {notice}
         </p>
       )}
@@ -83,7 +84,7 @@ export default function MediaVideosPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <input
           type="search"
           value={search}
@@ -92,7 +93,7 @@ export default function MediaVideosPage() {
             setPage(1);
           }}
           placeholder="Rechercher une vidéo…"
-          className="w-full max-w-xs rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+          className="input w-full max-w-xs"
         />
         <select
           value={statusFilter}
@@ -101,7 +102,7 @@ export default function MediaVideosPage() {
             setPage(1);
           }}
           aria-label="Filtrer par statut"
-          className="rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none"
+          className="input w-auto"
         >
           <option value="">Tous les statuts</option>
           <option value="DRAFT">Brouillon</option>
@@ -110,10 +111,10 @@ export default function MediaVideosPage() {
         </select>
       </div>
 
-      {isPending && <p className="text-slate-400">Chargement…</p>}
-      {isError && <p className="text-red-400">Impossible de charger les vidéos.</p>}
+      {isPending && <p className="text-fg-muted">Chargement…</p>}
+      {isError && <p className="text-danger">Impossible de charger les vidéos.</p>}
       {data && data.data.length === 0 && (
-        <p className="rounded-md border border-dashed border-slate-700 px-4 py-10 text-center text-slate-500">
+        <p className="rounded-md border border-dashed border-edge-strong px-4 py-10 text-center text-fg-muted">
           Aucune vidéo pour le moment.
         </p>
       )}
@@ -130,23 +131,23 @@ export default function MediaVideosPage() {
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-4 text-sm">
+        <div className="flex items-center justify-center gap-4 text-sm">
           <button
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md bg-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-600 disabled:opacity-40"
+            className={`page-btn ${page <= 1 ? 'page-btn-disabled' : ''}`}
           >
             Précédent
           </button>
-          <span className="text-slate-400">
+          <span className="text-fg-muted">
             Page {pagination.page} / {pagination.totalPages}
           </span>
           <button
             type="button"
             disabled={page >= pagination.totalPages}
             onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-            className="rounded-md bg-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-600 disabled:opacity-40"
+            className={`page-btn ${page >= pagination.totalPages ? 'page-btn-disabled' : ''}`}
           >
             Suivant
           </button>
@@ -179,10 +180,10 @@ function CreateVideoForm({ onSubmit }: { onSubmit: (input: Parameters<typeof cre
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-8 grid grid-cols-1 gap-3 rounded-lg border border-slate-700 bg-slate-800 p-4 sm:grid-cols-2"
+      className="card grid grid-cols-1 gap-3 sm:grid-cols-2"
     >
-      <div className="sm:col-span-2">
-        <label htmlFor="video-title" className="mb-1 block text-sm text-slate-300">
+      <div className="field sm:col-span-2">
+        <label htmlFor="video-title" className="field-label">
           Titre
         </label>
         <input
@@ -192,11 +193,11 @@ function CreateVideoForm({ onSubmit }: { onSubmit: (input: Parameters<typeof cre
           required
           minLength={3}
           maxLength={200}
-          className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none"
+          className="input w-full"
         />
       </div>
-      <div className="sm:col-span-2">
-        <label htmlFor="video-url" className="mb-1 block text-sm text-slate-300">
+      <div className="field sm:col-span-2">
+        <label htmlFor="video-url" className="field-label">
           URL (YouTube ou Vimeo)
         </label>
         <input
@@ -206,18 +207,18 @@ function CreateVideoForm({ onSubmit }: { onSubmit: (input: Parameters<typeof cre
           required
           type="url"
           placeholder="https://www.youtube.com/watch?v=…"
-          className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none"
+          className="input w-full"
         />
       </div>
-      <div>
-        <label htmlFor="video-category" className="mb-1 block text-sm text-slate-300">
+      <div className="field">
+        <label htmlFor="video-category" className="field-label">
           Catégorie (optionnel)
         </label>
         <select
           id="video-category"
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}
-          className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none"
+          className="input w-full"
         >
           <option value="">Aucune</option>
           {categories?.data.map((category) => (
@@ -227,25 +228,22 @@ function CreateVideoForm({ onSubmit }: { onSubmit: (input: Parameters<typeof cre
           ))}
         </select>
       </div>
-      <div>
-        <label htmlFor="video-status" className="mb-1 block text-sm text-slate-300">
+      <div className="field">
+        <label htmlFor="video-status" className="field-label">
           Statut initial
         </label>
         <select
           id="video-status"
           value={status}
           onChange={(event) => setStatus(event.target.value as VideoStatus)}
-          className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none"
+          className="input w-full"
         >
           <option value="DRAFT">Brouillon</option>
           <option value="PUBLISHED">Publiée</option>
         </select>
       </div>
       <div className="sm:col-span-2">
-        <button
-          type="submit"
-          className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
-        >
+        <button type="submit" className="btn btn-primary">
           Ajouter la vidéo
         </button>
       </div>
@@ -259,10 +257,10 @@ const STATUS_LABEL: Record<VideoStatus, string> = {
   ARCHIVED: 'Archivée',
 };
 
-const STATUS_CLASS: Record<VideoStatus, string> = {
-  DRAFT: 'bg-slate-600/40 text-slate-300',
-  PUBLISHED: 'bg-emerald-500/20 text-emerald-300',
-  ARCHIVED: 'bg-amber-500/20 text-amber-300',
+const STATUS_BADGE: Record<VideoStatus, string> = {
+  DRAFT: 'badge-neutral',
+  PUBLISHED: 'badge-success',
+  ARCHIVED: 'badge-warning',
 };
 
 function VideoCard({
@@ -275,7 +273,7 @@ function VideoCard({
   onDelete: () => void;
 }) {
   return (
-    <article className="flex flex-col gap-4 rounded-lg border border-slate-700 bg-slate-800 p-4 sm:flex-row">
+    <article className="card flex flex-col gap-4 sm:flex-row">
       <iframe
         src={video.url}
         title={video.title}
@@ -285,14 +283,14 @@ function VideoCard({
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="truncate font-semibold text-slate-100">{video.title}</h2>
-          <span className="rounded bg-slate-600/40 px-2 py-0.5 text-xs text-slate-300">{video.platform}</span>
-          <span className={`rounded px-2 py-0.5 text-xs ${STATUS_CLASS[video.status]}`}>
+          <h2 className="truncate font-display font-bold text-fg">{video.title}</h2>
+          <span className="badge badge-neutral">{video.platform}</span>
+          <span className={`badge ${STATUS_BADGE[video.status]}`}>
             {STATUS_LABEL[video.status]}
           </span>
         </div>
-        {video.description && <p className="line-clamp-2 text-sm text-slate-400">{video.description}</p>}
-        <p className="text-xs text-slate-500">
+        {video.description && <p className="line-clamp-2 text-sm text-fg-muted">{video.description}</p>}
+        <p className="text-xs text-fg-muted">
           {video.category ? `Catégorie : ${video.category.name} · ` : ''}
           {video.author.username} · {formatDate(video.created_at)}
         </p>
@@ -301,7 +299,7 @@ function VideoCard({
             <button
               type="button"
               onClick={() => onStatus('PUBLISHED')}
-              className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500"
+              className="btn btn-sm btn-primary"
             >
               Publier
             </button>
@@ -310,7 +308,7 @@ function VideoCard({
             <button
               type="button"
               onClick={() => onStatus('ARCHIVED')}
-              className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-500"
+              className="btn btn-sm btn-secondary"
             >
               Archiver
             </button>
@@ -320,14 +318,14 @@ function VideoCard({
               <button
                 type="button"
                 onClick={() => onStatus('PUBLISHED')}
-                className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500"
+                className="btn btn-sm btn-primary"
               >
                 Republier
               </button>
               <button
                 type="button"
                 onClick={() => onStatus('DRAFT')}
-                className="rounded-md bg-slate-600 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-500"
+                className="btn btn-sm btn-secondary"
               >
                 Repasser en brouillon
               </button>
@@ -336,7 +334,7 @@ function VideoCard({
           <button
             type="button"
             onClick={onDelete}
-            className="ml-auto rounded-md border border-red-500/40 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10"
+            className="btn btn-sm btn-danger ml-auto"
           >
             Supprimer
           </button>

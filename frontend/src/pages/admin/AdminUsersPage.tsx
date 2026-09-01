@@ -50,80 +50,82 @@ export default function AdminUsersPage() {
   const pagination = data?.pagination;
 
   return (
-    <section>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-amber-400">Utilisateurs</h1>
-          <p className="mt-1 text-sm text-slate-400">Gestion des comptes utilisateurs.</p>
+          <p className="kicker">Équipe</p>
+          <h1 className="page-title">Utilisateurs</h1>
+          <p className="page-subtitle mt-1">Gestion des comptes utilisateurs.</p>
         </div>
-        <button type="button" onClick={() => { setEditingUser(null); setShowForm(true); setError(null); setNotice(null); }}
-          className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400">
+        <button type="button" onClick={() => { setEditingUser(null); setShowForm(true); setError(null); setNotice(null); }} className="btn btn-primary">
           + Nouveau
         </button>
       </div>
 
-      {notice && <p className="mb-4 rounded-md bg-green-500/10 px-4 py-2 text-sm text-green-400">{notice}</p>}
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="alert alert-success">{notice}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
-      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="mb-4 flex flex-wrap gap-3">
+      <form onSubmit={(e) => { e.preventDefault(); setQuery({ ...query, page: 1 }); }} className="flex flex-wrap gap-2">
         <input type="text" placeholder="Rechercher..." value={query.search ?? ''}
           onChange={(e) => setQuery({ ...query, search: e.target.value || undefined, page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500" />
+          className="input w-56" />
         <select value={query.role ?? ''} onChange={(e) => setQuery({ ...query, role: (e.target.value || undefined) as 'USER' | 'ADMIN', page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100">
+          className="input w-auto">
           <option value="">Tous les roles</option>
           <option value="USER">USER</option>
           <option value="ADMIN">ADMIN</option>
         </select>
         <select value={query.status ?? ''} onChange={(e) => setQuery({ ...query, status: (e.target.value || undefined) as 'ACTIVE' | 'DISABLED', page: 1 })}
-          className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100">
+          className="input w-auto">
           <option value="">Tous les statuts</option>
           <option value="ACTIVE">Actif</option>
           <option value="DISABLED">Desactive</option>
         </select>
       </form>
 
-      {isPending ? <p className="text-slate-400">Chargement...</p> : users.length === 0 ? (
-        <p className="text-slate-400">Aucun utilisateur.</p>
+      {isPending ? (
+        <p className="text-fg-muted">Chargement...</p>
+      ) : users.length === 0 ? (
+        <p className="text-fg-muted">Aucun utilisateur.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-slate-700 text-slate-400">
-                <th className="px-3 py-2">Username</th>
-                <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">Role</th>
-                <th className="px-3 py-2">Statut</th>
-                <th className="px-3 py-2">Derniere connexion</th>
-                <th className="px-3 py-2">Cree le</th>
-                <th className="px-3 py-2">Actions</th>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Statut</th>
+                <th>Derniere connexion</th>
+                <th>Cree le</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                  <td className="px-3 py-2 font-medium text-slate-100">{u.username}</td>
-                  <td className="px-3 py-2 text-slate-300">{u.email}</td>
-                  <td className="px-3 py-2">
-                    <span className={`rounded px-2 py-0.5 text-xs ${u.role === 'ADMIN' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-700 text-slate-300'}`}>{u.role}</span>
+                <tr key={u.id}>
+                  <td><strong>{u.username}</strong></td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className={`badge ${u.role === 'ADMIN' ? 'badge-accent' : 'badge-neutral'}`}>{u.role}</span>
                   </td>
-                  <td className="px-3 py-2">
-                    <span className={`rounded px-2 py-0.5 text-xs ${u.status === 'ACTIVE' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>{u.status}</span>
+                  <td>
+                    <span className={`badge ${u.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}`}>{u.status}</span>
                   </td>
-                  <td className="px-3 py-2 text-slate-400">{formatDate(u.last_login_at)}</td>
-                  <td className="px-3 py-2 text-slate-400">{formatDate(u.created_at)}</td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap gap-2">
+                  <td className="mono">{formatDate(u.last_login_at)}</td>
+                  <td className="mono">{formatDate(u.created_at)}</td>
+                  <td>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
                       <button type="button" onClick={() => { setEditingUser(u); setShowForm(true); }}
-                        className="text-xs text-amber-400 hover:underline">Modifier</button>
+                        className="cursor-pointer font-semibold text-accent hover:text-accent-strong">Modifier</button>
                       <button type="button" onClick={() => statusMutation.mutate({ id: u.id, status: u.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}
-                        className={`text-xs hover:underline ${u.status === 'ACTIVE' ? 'text-orange-400' : 'text-green-400'}`}>
+                        className={`cursor-pointer font-semibold hover:underline ${u.status === 'ACTIVE' ? 'text-warning' : 'text-success'}`}>
                         {u.status === 'ACTIVE' ? 'Desactiver' : 'Activer'}
                       </button>
                       <button type="button" onClick={() => setResetId(resetId === u.id ? null : u.id)}
-                        className="text-xs text-blue-400 hover:underline">Reset MDP</button>
+                        className="cursor-pointer font-semibold text-info hover:underline">Reset MDP</button>
                       <button type="button" onClick={() => setLoginUser({ id: u.id, username: u.username })}
-                        className="text-xs text-violet-400 hover:underline">Connexions</button>
+                        className="cursor-pointer font-semibold text-accent hover:underline">Connexions</button>
                     </div>
                     {resetId === u.id && (
                       <ResetPasswordForm
@@ -141,10 +143,10 @@ export default function AdminUsersPage() {
       )}
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
+        <div className="flex justify-center gap-2">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
             <button key={p} type="button" onClick={() => setQuery({ ...query, page: p })}
-              className={`rounded px-3 py-1 text-sm ${p === query.page ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>{p}</button>
+              className={`page-btn ${p === query.page ? 'page-btn-active' : ''}`}>{p}</button>
           ))}
         </div>
       )}
@@ -180,10 +182,10 @@ function ResetPasswordForm({ onSubmit, onCancel, isPending }: { onSubmit: (p: st
   return (
     <div className="mt-2 flex items-center gap-2">
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nouveau MDP (8+ chars)" minLength={8}
-        className="w-48 rounded border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-100" />
+        className="input input-mono w-48 px-2 py-1 text-xs" />
       <button type="button" disabled={isPending || password.length < 8} onClick={() => onSubmit(password)}
-        className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500 disabled:opacity-50">OK</button>
-      <button type="button" onClick={onCancel} className="text-xs text-slate-400 hover:text-slate-200">Annuler</button>
+        className="btn btn-sm">OK</button>
+      <button type="button" onClick={onCancel} className="link">Annuler</button>
     </div>
   );
 }
@@ -197,12 +199,12 @@ function resultLabel(result: LoginHistoryEntry['result']): string {
   }
 }
 
-function resultColor(result: LoginHistoryEntry['result']): string {
+function resultBadge(result: LoginHistoryEntry['result']): string {
   switch (result) {
-    case 'SUCCESS': return 'bg-green-500/20 text-green-300';
-    case 'FAILURE': return 'bg-red-500/20 text-red-300';
-    case 'LOGOUT': return 'bg-slate-700 text-slate-300';
-    default: return 'bg-slate-700 text-slate-300';
+    case 'SUCCESS': return 'badge-success';
+    case 'FAILURE': return 'badge-danger';
+    case 'LOGOUT': return 'badge-neutral';
+    default: return 'badge-neutral';
   }
 }
 
@@ -222,75 +224,77 @@ function LoginHistoryModal({ userId, username, onClose }: { userId: string; user
   const latest = entries[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-lg bg-slate-800 p-6 shadow-xl">
+    <div className="modal-overlay">
+      <div className="modal-panel max-w-3xl">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-amber-400">Connexions de {username}</h2>
-            <p className="mt-1 text-sm text-slate-400">Historique des connexions, horaires, adresses IP et ports source.</p>
+            <h2 className="font-display text-lg font-bold text-fg">Connexions de {username}</h2>
+            <p className="mt-1 text-sm text-fg-muted">Historique des connexions, horaires, adresses IP et ports source.</p>
           </div>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-200" aria-label="Fermer">&times;</button>
+          <button type="button" onClick={onClose} className="btn btn-ghost btn-sm" aria-label="Fermer">
+            &times;
+          </button>
         </div>
 
         {isPending ? (
-          <p className="text-slate-400">Chargement...</p>
+          <p className="text-fg-muted">Chargement...</p>
         ) : isError ? (
-          <p className="rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">Impossible de charger l'historique de connexion.</p>
+          <p className="alert alert-error">Impossible de charger l'historique de connexion.</p>
         ) : entries.length === 0 ? (
-          <p className="text-slate-400">Aucune connexion enregistree pour cet utilisateur.</p>
+          <p className="text-fg-muted">Aucune connexion enregistree pour cet utilisateur.</p>
         ) : (
           <>
-            <div className="mb-4 rounded-md bg-slate-900 p-4">
-              <h3 className="mb-2 text-sm font-semibold text-slate-200">Derniere connexion</h3>
+            <div className="card mb-4">
+              <h3 className="mb-2 text-sm font-semibold text-fg">Derniere connexion</h3>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
                 <div>
-                  <dt className="text-xs text-slate-500">Horaire</dt>
-                  <dd className="text-slate-100">{formatDate(latest.created_at)}</dd>
+                  <dt className="text-xs text-fg-muted">Horaire</dt>
+                  <dd className="text-fg">{formatDate(latest.created_at)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500">Adresse IP publique</dt>
-                  <dd className="font-mono text-slate-100">{latest.ip ?? '—'}</dd>
+                  <dt className="text-xs text-fg-muted">Adresse IP publique</dt>
+                  <dd className="mono font-mono text-fg">{latest.ip ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500">Port source</dt>
-                  <dd className="font-mono text-slate-100">{latest.source_port ?? 'Non disponible'}</dd>
+                  <dt className="text-xs text-fg-muted">Port source</dt>
+                  <dd className="mono font-mono text-fg">{latest.source_port ?? 'Non disponible'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500">Resultat</dt>
-                  <dd><span className={`rounded px-2 py-0.5 text-xs ${resultColor(latest.result)}`}>{resultLabel(latest.result)}</span></dd>
+                  <dt className="text-xs text-fg-muted">Resultat</dt>
+                  <dd><span className={`badge ${resultBadge(latest.result)}`}>{resultLabel(latest.result)}</span></dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500">Acces</dt>
-                  <dd className="text-slate-100">{latest.access_type}</dd>
+                  <dt className="text-xs text-fg-muted">Acces</dt>
+                  <dd className="text-fg">{latest.access_type}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500">Navigateur</dt>
-                  <dd className="truncate text-slate-100" title={latest.user_agent ?? ''}>{latest.user_agent ?? '—'}</dd>
+                  <dt className="text-xs text-fg-muted">Navigateur</dt>
+                  <dd className="truncate text-fg" title={latest.user_agent ?? ''}>{latest.user_agent ?? '—'}</dd>
                 </div>
               </dl>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="table-wrap">
+              <table className="data-table">
                 <thead>
-                  <tr className="border-b border-slate-700 text-slate-400">
-                    <th className="px-3 py-2">Horaire</th>
-                    <th className="px-3 py-2">IP publique</th>
-                    <th className="px-3 py-2">Port</th>
-                    <th className="px-3 py-2">Resultat</th>
-                    <th className="px-3 py-2">Acces</th>
-                    <th className="px-3 py-2">Navigateur</th>
+                  <tr>
+                    <th>Horaire</th>
+                    <th>IP publique</th>
+                    <th>Port</th>
+                    <th>Resultat</th>
+                    <th>Acces</th>
+                    <th>Navigateur</th>
                   </tr>
                 </thead>
                 <tbody>
                   {entries.map((e) => (
-                    <tr key={e.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                      <td className="px-3 py-2 text-slate-300">{formatDate(e.created_at)}</td>
-                      <td className="px-3 py-2 font-mono text-slate-100">{e.ip ?? '—'}</td>
-                      <td className="px-3 py-2 font-mono text-slate-300">{e.source_port ?? 'N/A'}</td>
-                      <td className="px-3 py-2"><span className={`rounded px-2 py-0.5 text-xs ${resultColor(e.result)}`}>{resultLabel(e.result)}</span></td>
-                      <td className="px-3 py-2 text-slate-300">{e.access_type}</td>
-                      <td className="max-w-[12rem] truncate px-3 py-2 text-slate-400" title={e.user_agent ?? ''}>{e.user_agent ?? '—'}</td>
+                    <tr key={e.id}>
+                      <td>{formatDate(e.created_at)}</td>
+                      <td className="mono">{e.ip ?? '—'}</td>
+                      <td className="mono">{e.source_port ?? 'N/A'}</td>
+                      <td><span className={`badge ${resultBadge(e.result)}`}>{resultLabel(e.result)}</span></td>
+                      <td>{e.access_type}</td>
+                      <td className="max-w-[12rem] truncate" title={e.user_agent ?? ''}>{e.user_agent ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -299,15 +303,15 @@ function LoginHistoryModal({ userId, username, onClose }: { userId: string; user
 
             {pagination && pagination.totalPages > 1 && (
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-slate-500">{pagination.total} connexion(s)</span>
-                <div className="flex gap-2">
+                <span className="text-xs text-fg-muted">{pagination.total} connexion(s)</span>
+                <div className="flex items-center gap-2">
                   <button type="button" disabled={query.page <= 1} onClick={() => setQuery({ ...query, page: query.page - 1 })}
-                    className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-600 disabled:opacity-40">
+                    className={`page-btn ${query.page <= 1 ? 'page-btn-disabled' : ''}`}>
                     Precedent
                   </button>
-                  <span className="px-2 py-1 text-xs text-slate-400">Page {query.page} / {pagination.totalPages}</span>
+                  <span className="px-2 py-1 text-xs text-fg-secondary">Page {query.page} / {pagination.totalPages}</span>
                   <button type="button" disabled={query.page >= pagination.totalPages} onClick={() => setQuery({ ...query, page: query.page + 1 })}
-                    className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-600 disabled:opacity-40">
+                    className={`page-btn ${query.page >= pagination.totalPages ? 'page-btn-disabled' : ''}`}>
                     Suivant
                   </button>
                 </div>
@@ -343,33 +347,27 @@ function UserForm({ editing, onSubmit, onClose, isPending }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-lg bg-slate-800 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-bold text-amber-400">{editing ? 'Modifier' : 'Nouvel utilisateur'}</h2>
+    <div className="modal-overlay">
+      <form onSubmit={handleSubmit} className="modal-panel">
+        <h2 className="mb-4 font-display text-lg font-bold text-fg">{editing ? 'Modifier' : 'Nouvel utilisateur'}</h2>
         <div className="space-y-3">
-          <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={32}
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
+          <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={32} className="input" />
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input" />
           <div className="flex gap-3">
-            <input type="text" placeholder="Prenom" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-              className="flex-1 rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
-            <input type="text" placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)}
-              className="flex-1 rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
+            <input type="text" placeholder="Prenom" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input flex-1" />
+            <input type="text" placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input flex-1" />
           </div>
-          <select value={role} onChange={(e) => setRole(e.target.value as 'USER' | 'ADMIN')}
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100">
+          <select value={role} onChange={(e) => setRole(e.target.value as 'USER' | 'ADMIN')} className="input w-full">
             <option value="USER">USER</option>
             <option value="ADMIN">ADMIN</option>
           </select>
           {!editing && (
-            <input type="password" placeholder="Mot de passe (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
-              className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
+            <input type="password" placeholder="Mot de passe (8+ chars)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input w-full" />
           )}
         </div>
         <div className="mt-4 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm text-slate-400 hover:text-slate-200">Annuler</button>
-          <button type="submit" disabled={isPending} className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400 disabled:opacity-50">
+          <button type="button" onClick={onClose} className="btn btn-ghost">Annuler</button>
+          <button type="submit" disabled={isPending} className="btn btn-primary">
             {isPending ? 'Envoi...' : editing ? 'Mettre a jour' : 'Creer'}
           </button>
         </div>

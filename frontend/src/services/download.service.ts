@@ -100,14 +100,10 @@ export async function listPublicDownloads(query: DownloadQuery = {}): Promise<Li
 }
 
 export async function downloadFile(id: string): Promise<void> {
-  const response = await api.get(`/downloads/${id}/file`, { responseType: 'blob' });
-  const blob = new Blob([response.data as BlobPart]);
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = '';
+  a.href = `${api.defaults.baseURL}/downloads/${id}/file`;
+  a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.remove();
 }

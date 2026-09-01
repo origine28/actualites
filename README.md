@@ -80,8 +80,21 @@ npm run dev
 - Guide de demo : [docs/demo-v0.1.md](docs/demo-v0.1.md)
 - Rapport de validation : [docs/rapports/v0.1-demo.md](docs/rapports/v0.1-demo.md)
 
+## Refonte UI — Design system presse editoriale
+
+**Statut** : Terminee
+
+- Mode sombre par defaut + bascule clair/sombre persistee (sans flash au chargement)
+- Accent unique ocre ambre (vert reserve aux etats succes/publie)
+- Fraunces (titres), Instrument Sans (corps), JetBrains Mono (donnees)
+- Tokens CSS dark/light + classes systeme (`.btn`, `.badge`, `.card`, `.data-table`, `.modal-*`, ...) dans `frontend/src/index.css`
+- Tous les ecrans publics et admin refondus ; corps d'article style par `.article-body`
+- Note : les telechargements publies sont desormais accessibles sans authentification
+- Rapport complet : [docs/rapports/design-system.md](docs/rapports/design-system.md)
+
 ## Statut des phases
 
+- [x] Refonte UI — Design system presse editoriale (voir [docs/rapports/design-system.md](docs/rapports/design-system.md))
 - [x] Phase 1 — Initialisation du projet
 - [x] Phase 2 — Authentification
 - [x] Phase 3 — Utilisateurs + journaux de connexion

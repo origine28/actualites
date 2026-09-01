@@ -576,9 +576,17 @@ describe('GET /api/downloads', () => {
         expect(titles).toContain('Public PDF');
         expect(titles).not.toContain('Private APK');
 
-        // Filtre type=MOBILE : ne devrait rien retourner (le seul MOBILE est DRAFT)
+        // Filtre type=MOBILE : uniquement des MOBILE publies (residuel demo
+        // possible en base), jamais le brouillon DRAFT
         const mobile = await userAgent.get('/api/downloads?type=MOBILE');
-        expect(mobile.body.data.length).toBe(0);
+        expect(mobile.status).toBe(200);
+        expect(
+          mobile.body.data.every(
+            (d: { type: string; status: string }) => d.type === 'MOBILE' && d.status === 'PUBLISHED',
+          ),
+        ).toBe(true);
+        const mobileTitles = mobile.body.data.map((d: { title: string }) => d.title);
+        expect(mobileTitles).not.toContain('Private APK');
       } finally {
         await cleanupUser(user.id);
       }

@@ -39,51 +39,57 @@ export default function AdminCategoriesPage() {
   const categories = data?.data ?? [];
 
   return (
-    <section>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-amber-400">Categories</h1>
-          <p className="mt-1 text-sm text-slate-400">Gestion des categories de contenu.</p>
+          <p className="kicker">Contenu</p>
+          <h1 className="page-title">Categories</h1>
+          <p className="page-subtitle mt-1">Gestion des categories de contenu.</p>
         </div>
-        <button type="button" onClick={() => { setEditing(null); setShowForm(true); }}
-          className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400">
+        <button type="button" onClick={() => { setEditing(null); setShowForm(true); }} className="btn btn-primary">
           + Nouvelle
         </button>
       </div>
 
-      {notice && <p className="mb-4 rounded-md bg-green-500/10 px-4 py-2 text-sm text-green-400">{notice}</p>}
-      {error && <p className="mb-4 rounded-md bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="alert alert-success">{notice}</p>}
+      {error && <p role="alert" className="alert alert-error">{error}</p>}
 
-      {isPending ? <p className="text-slate-400">Chargement...</p> : categories.length === 0 ? (
-        <p className="text-slate-400">Aucune categorie.</p>
+      {isPending ? (
+        <p className="text-fg-muted">Chargement...</p>
+      ) : categories.length === 0 ? (
+        <p className="text-fg-muted">Aucune categorie.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-slate-700 text-slate-400">
-                <th className="px-3 py-2">Nom</th>
-                <th className="px-3 py-2">Slug</th>
-                <th className="px-3 py-2">Ordre</th>
-                <th className="px-3 py-2">Statut</th>
-                <th className="px-3 py-2">Articles</th>
-                <th className="px-3 py-2">Cree le</th>
-                <th className="px-3 py-2">Actions</th>
+              <tr>
+                <th>Nom</th>
+                <th>Slug</th>
+                <th>Ordre</th>
+                <th>Statut</th>
+                <th>Articles</th>
+                <th>Cree le</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {categories.map((c) => (
-                <tr key={c.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                  <td className="px-3 py-2 font-medium text-slate-100">{c.name}</td>
-                  <td className="px-3 py-2 text-slate-300">{c.slug}</td>
-                  <td className="px-3 py-2 text-slate-300">{c.sort_order}</td>
-                  <td className="px-3 py-2">
-                    <span className={`rounded px-2 py-0.5 text-xs ${c.status === 'ACTIVE' ? 'bg-green-500/20 text-green-300' : 'bg-slate-600 text-slate-400'}`}>{c.status}</span>
+                <tr key={c.id}>
+                  <td><strong>{c.name}</strong></td>
+                  <td className="mono">{c.slug}</td>
+                  <td>{c.sort_order}</td>
+                  <td>
+                    <span className={`badge ${c.status === 'ACTIVE' ? 'badge-success' : 'badge-neutral'}`}>{c.status}</span>
                   </td>
-                  <td className="px-3 py-2 text-slate-300">{c.children_count}</td>
-                  <td className="px-3 py-2 text-slate-400">{formatDate(c.created_at)}</td>
-                  <td className="px-3 py-2 flex gap-2">
-                    <button type="button" onClick={() => { setEditing(c); setShowForm(true); }} className="text-xs text-amber-400 hover:underline">Modifier</button>
-                    <button type="button" onClick={() => { if (confirm('Supprimer cette categorie ?')) deleteMutation.mutate(c.id); }} className="text-xs text-red-400 hover:underline">Supprimer</button>
+                  <td>{c.children_count}</td>
+                  <td className="mono">{formatDate(c.created_at)}</td>
+                  <td>
+                    <div className="flex gap-x-3 gap-y-1 text-xs">
+                      <button type="button" onClick={() => { setEditing(c); setShowForm(true); }}
+                        className="cursor-pointer font-semibold text-accent hover:text-accent-strong">Modifier</button>
+                      <button type="button" onClick={() => { if (confirm('Supprimer cette categorie ?')) deleteMutation.mutate(c.id); }}
+                        className="cursor-pointer font-semibold text-danger hover:underline">Supprimer</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -118,24 +124,21 @@ function CategoryForm({ editing, onSubmit, onClose, isPending }: {
   const [status, setStatus] = useState(editing?.status ?? 'ACTIVE');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="modal-overlay">
       <form onSubmit={(e) => { e.preventDefault(); onSubmit({ name, sort_order: sortOrder, status }); }}
-        className="w-full max-w-md rounded-lg bg-slate-800 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-bold text-amber-400">{editing ? 'Modifier' : 'Nouvelle categorie'}</h2>
+        className="modal-panel max-w-md">
+        <h2 className="mb-4 font-display text-lg font-bold text-fg">{editing ? 'Modifier' : 'Nouvelle categorie'}</h2>
         <div className="space-y-3">
-          <input type="text" placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} required
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
-          <input type="number" placeholder="Ordre" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} min={0}
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100" />
-          <select value={status} onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100">
+          <input type="text" placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} required className="input w-full" />
+          <input type="number" placeholder="Ordre" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} min={0} className="input w-full" />
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full">
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
           </select>
         </div>
         <div className="mt-4 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm text-slate-400 hover:text-slate-200">Annuler</button>
-          <button type="submit" disabled={isPending} className="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-amber-400 disabled:opacity-50">
+          <button type="button" onClick={onClose} className="btn btn-ghost">Annuler</button>
+          <button type="submit" disabled={isPending} className="btn btn-primary">
             {isPending ? 'Envoi...' : editing ? 'Mettre a jour' : 'Creer'}
           </button>
         </div>
