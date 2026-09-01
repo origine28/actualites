@@ -24,7 +24,6 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/downloads" element={<DownloadsPage />} />
       <Route
         path="/app"
         element={
@@ -35,6 +34,7 @@ export default function App() {
       >
         <Route path="articles" element={<ArticlesPage />} />
         <Route path="articles/:slug" element={<ArticleDetailPage />} />
+        <Route path="downloads" element={<DownloadsPage />} />
         <Route path="contact" element={<ContactPage />} />
       </Route>
       <Route

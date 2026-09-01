@@ -2,7 +2,6 @@ import { Router } from 'express';
 import type { DownloadController } from '../controllers/download.controller.ts';
 import { csrfProtect } from '../middleware/csrf.ts';
 import { noStore } from '../middleware/noStore.ts';
-import { optionalAuth } from '../middleware/optionalAuth.ts';
 import { requireAuth } from '../middleware/requireAuth.ts';
 import { requireRole } from '../middleware/requireRole.ts';
 import { handleUploadError, uploadSingleDownload } from '../middleware/upload.ts';
@@ -15,8 +14,8 @@ export interface DownloadRouterDeps {
  * Routes téléchargements :
  * - `/api/admin/downloads/*` : session valide + rôle ADMIN, mutations protégées CSRF ;
  * - `/api/admin/download-categories/*` : session valide + rôle ADMIN ;
- * - `/api/downloads` : liste publique (authentifiée) ;
- * - `/api/downloads/:id/file` : téléchargement du fichier (authentifié).
+ * - `/api/downloads` : liste des téléchargements publiés (utilisateur connecté) ;
+ * - `/api/downloads/:id/file` : téléchargement du fichier (utilisateur connecté).
  */
 export function createDownloadAdminRouter(deps: DownloadRouterDeps): Router {
   const router = Router();
@@ -44,9 +43,9 @@ export function createDownloadAdminRouter(deps: DownloadRouterDeps): Router {
 export function createDownloadPublicRouter(deps: DownloadRouterDeps): Router {
   const router = Router();
 
-  router.use(optionalAuth);
-  router.get('/downloads', deps.controller.listPublicDownloads);
-  router.get('/downloads/:id/file', deps.controller.downloadFile);
+  // Liste et fichiers de téléchargements : utilisateurs connectés uniquement.
+  router.get('/downloads', requireAuth, deps.controller.listPublicDownloads);
+  router.get('/downloads/:id/file', requireAuth, deps.controller.downloadFile);
 
   return router;
 }

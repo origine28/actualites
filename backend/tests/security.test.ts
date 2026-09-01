@@ -364,9 +364,9 @@ describe('Download security', () => {
     }
   });
 
-  it('GET /api/downloads/:id/file sans auth → 404 (route publique, id inconnu)', async () => {
+  it('GET /api/downloads/:id/file sans auth → 401', async () => {
     const res = await request(app).get('/api/downloads/00000000-0000-0000-0000-000000000000/file');
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(401);
   });
 
   it('GET /api/downloads/:id/file avec UUID invalide → 404', async () => {

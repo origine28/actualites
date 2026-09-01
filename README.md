@@ -89,7 +89,7 @@ npm run dev
 - Fraunces (titres), Instrument Sans (corps), JetBrains Mono (donnees)
 - Tokens CSS dark/light + classes systeme (`.btn`, `.badge`, `.card`, `.data-table`, `.modal-*`, ...) dans `frontend/src/index.css`
 - Tous les ecrans publics et admin refondus ; corps d'article style par `.article-body`
-- Note : les telechargements publies sont desormais accessibles sans authentification
+- Note : les telechargements sont reserves aux utilisateurs connectes
 - Rapport complet : [docs/rapports/design-system.md](docs/rapports/design-system.md)
 
 ## Statut des phases

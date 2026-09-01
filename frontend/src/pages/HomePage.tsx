@@ -37,9 +37,6 @@ export default function HomePage() {
           <Link to="/login" className="btn btn-primary">
             Se connecter
           </Link>
-          <Link to="/downloads" className="btn btn-secondary">
-            Téléchargements
-          </Link>
         </div>
 
         <div className="mt-14 min-h-8">

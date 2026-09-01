@@ -330,7 +330,7 @@ export const downloadService = {
     try { await storage.deleteFile(existing.filename); } catch { /* best-effort */ }
   },
 
-  async downloadFile(user: { id: string } | null, id: string, ip: string | null) {
+  async downloadFile(user: { id: string }, id: string, ip: string | null) {
     const existing = await downloadRepository.findById(id);
     if (!existing || existing.deleted_at) {
       throw new ApiError(404, 'DOWNLOAD_NOT_FOUND', 'Telechargement introuvable');
@@ -345,13 +345,11 @@ export const downloadService = {
       throw new ApiError(500, 'FILE_MISSING', 'Fichier absent du disque');
     }
 
-    if (user) {
-      await downloadLogRepository.create({
-        user_id: user.id,
-        download_id: id,
-        ip,
-      });
-    }
+    await downloadLogRepository.create({
+      user_id: user.id,
+      download_id: id,
+      ip,
+    });
 
     const sizeBytes = statSize(existing.filename, storage);
 

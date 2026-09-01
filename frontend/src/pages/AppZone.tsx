@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore.ts';
 
 const NAV_LINKS = [
   { to: '/app/articles', label: 'Actualités' },
-  { to: '/downloads', label: 'Téléchargements' },
+  { to: '/app/downloads', label: 'Téléchargements' },
   { to: '/app/contact', label: 'Contact' },
 ];
 
